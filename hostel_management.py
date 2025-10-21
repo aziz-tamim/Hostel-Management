@@ -32,6 +32,34 @@ def has_fixed_cost(roll):
             return True
     return False
 
+# ------------------- Tooltip Class -------------------
+# class ToolTip:
+#     def __init__(self, widget, text):
+#         self.widget = widget
+#         self.text = text
+#         self.tip_window = None
+#         self.widget.bind("<Enter>", self.show_tip)
+#         self.widget.bind("<Leave>", self.hide_tip)
+
+#     def show_tip(self, event=None):
+#         if self.tip_window or not self.text:
+#             return
+#         x, y, _, cy = self.widget.bbox("insert") or (0,0,0,0)
+#         x = x + self.widget.winfo_rootx() + 25
+#         y = y + cy + self.widget.winfo_rooty() + 20
+#         self.tip_window = tw = tk.Toplevel(self.widget)
+#         tw.wm_overrideredirect(True)
+#         tw.wm_geometry(f"+{x}+{y}")
+#         label = tk.Label(tw, text=self.text, justify='left',
+#                          background="#ffffe0", relief='solid', borderwidth=1,
+#                          font=("tahoma", "8", "normal"))
+#         label.pack(ipadx=5, ipady=3)
+
+#     def hide_tip(self, event=None):
+#         if self.tip_window:
+#             self.tip_window.destroy()
+#         self.tip_window = None
+
 # ------------------- Add Expense -------------------
 def add_expense():
     roll = roll_entry.get().strip()
@@ -69,6 +97,17 @@ def add_expense():
     save_data()
     update_table()
     messagebox.showinfo("Success", f"Expense added for Roll {roll} - {student}")
+    
+    # ------------------ Auto Clear Fields ------------------
+    roll_entry.delete(0, tk.END)
+    student_name.delete(0, tk.END)
+    religion_var.set('')
+    prayer_var.set('')
+    meal_count_entry.delete(0, tk.END)
+    mess_entry.delete(0, tk.END)
+    # hostel_entry.delete(0, tk.END)
+    # electricity_entry.delete(0, tk.END)
+    # inventory_entry.delete(0, tk.END)
 
 # ------------------- Update Table -------------------
 def update_table():
@@ -175,6 +214,32 @@ def show_student_summary():
     tk.Button(popup, text="Close", command=lambda: (popup.destroy(), on_popup_close()),
               font=("Helvetica", 12, "bold"), bg="#ff9800", fg="white", width=15).pack(pady=10)
 
+def show_overall_chart():
+    if not data:
+        messagebox.showinfo("Info", "No data available to show chart!")
+        return
+
+    total_mess = total_hostel = total_electricity = total_inventory = 0
+
+    for row in data:
+        try:
+            total_mess += float(row[7])
+            total_hostel += float(row[8])
+            total_electricity += float(row[9])
+            total_inventory += float(row[10])
+        except ValueError:
+            continue
+
+    categories = ["Meal", "Hostel", "Electricity", "Inventory"]
+    values = [total_mess, total_hostel, total_electricity, total_inventory]
+
+    plt.figure(figsize=(6, 5))
+    plt.bar(categories, values, color=["#4CAF50", "#2196F3", "#FF9800", "#F44336"])
+    plt.title("Overall Expense Summary (All Students)")
+    plt.ylabel("Total Amount (BDT)")
+    plt.tight_layout()
+    plt.show()
+
 # ------------------- Theme -------------------
 def toggle_theme():
     global theme
@@ -218,8 +283,12 @@ entry_frame = tk.Frame(root, bg=theme["bg"], pady=5)
 entry_frame.pack(fill=tk.X, padx=20, pady=10)
 
 tk.Label(entry_frame, text="Roll", font=header_font, bg=theme["bg"], fg=theme["fg"]).grid(row=0, column=0, padx=5, pady=2, sticky="w")
-roll_entry = tk.Entry(entry_frame, font=entry_font)
+def only_numbers(char):
+    return char.isdigit()
+roll_entry = tk.Entry(entry_frame, font=entry_font, validate="key")
+roll_entry['validatecommand'] = (roll_entry.register(only_numbers), '%S')
 roll_entry.grid(row=0, column=1, padx=5, pady=2)
+
 
 tk.Label(entry_frame, text="Student Name", font=header_font, bg=theme["bg"], fg=theme["fg"]).grid(row=0, column=2, padx=5, pady=2, sticky="w")
 student_name = tk.Entry(entry_frame, font=entry_font)
@@ -258,7 +327,10 @@ inventory_entry = tk.Entry(entry_frame, font=entry_font)
 inventory_entry.grid(row=2, column=1, padx=5, pady=2)
 
 tk.Button(entry_frame, text="Add Expense", command=add_expense,
-          bg="#4CAF50", fg="white", font=header_font, width=18, pady=5).grid(row=2, column=7, padx=5, pady=5)
+          bg="#4CAF50", fg="white", font=header_font, width=18, pady=5).grid(row=2, column=5, padx=10, pady=5)
+
+tk.Button(entry_frame, text="Show Overall Cost", command=show_overall_chart,
+          bg="#FF5722", fg="white", font=header_font, width=20, pady=5).grid(row=2, column=6, padx=10, pady=5)
 
 # Table Frame
 table_frame = tk.Frame(root, bg=theme["bg"])

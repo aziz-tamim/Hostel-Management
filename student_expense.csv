@@ -3,3 +3,7 @@ Serial,Roll,Student,Date,Religion,PrayerDone,MealCount,Mess,Hostel,Electricity,I
 2,54,Abdul Aziz,2025-10-20,Muslim,Yes,3,105.0,1200.0,100.0,100.0
 3,54,Abdul Aziz,2025-10-20,Muslim,No,4,140.0,0,0,0
 4,51,Emon,2025-10-20,Hindu,Yes,3,105.0,0,0,0
+5,879954,Abdul Aziz,2025-10-21,Muslim,Yes,3,105.0,1200.0,120.0,100.0
+6,879954,Abdul Aziz,2025-10-21,Muslim,No,4,140.0,0,0,0
+7,54,Abdul Aziz,2025-10-21,Muslim,Yes,3,105.0,0,0,0
+8,Ab,Abdul Aziz,2025-10-21,Muslim,No,4,140.0,1200.0,120.0,100.0
