@@ -245,10 +245,74 @@ header_font = ("Helvetica", 10, "bold")
 entry_font = ("Helvetica", 9)
 
 # Header
-header_frame = tk.Frame(root, bg=theme["bg"])
+header_frame = tk.Frame(root, bg="#cce5ff", pady=10)
 header_frame.pack(fill=tk.X, pady=5)
-tk.Label(header_frame, text="🏠 Hostel & Mess Management System", font=("Helvetica", 18, "bold"),
-         bg=theme["bg"], fg="#1a237e").pack(pady=10)
+
+tk.Label(header_frame, text="🏠 Hostel & Mess Management System Center", 
+         font=("Helvetica", 16, "bold"),
+         bg="#cce5ff", fg="#1a237e").pack(side=tk.LEFT, padx=16)
+
+# ------------------- Help Button -------------------
+def show_help():
+    popup = tk.Toplevel(root)
+    popup.title("Help")
+    popup.configure(bg="#f0f4f7")
+    popup.geometry("580x480")
+
+    tk.Label(popup, 
+        text="🏠 Hostel & Mess Management System - Help Center",
+        font=("Helvetica", 16, "bold"),
+        fg="#1a237e",
+        bg="#f0f4f7",
+        justify="center",
+        anchor="n"
+    ).pack(fill=tk.X, pady=(10,15))
+    tk.Label(popup, text=(
+        "Instructions for Students:\n\n"
+        "1. Fill in your Roll Number and Full Name.\n"
+        "2. Select your Religion and indicate if Prayer was done.\n"
+        "3. Enter the number of meals taken.\n"
+        "4. Provide numeric values for Mess, Hostel, Electricity, and Inventory costs.\n"
+        "5. Click 'Add Expense' to save your daily records.\n"
+        "6. Use 'Show Overall Cost' to view the total expenses for all students.\n"
+        "7. Use the 'Summary' section to view student-wise expense breakdown and charts.\n"
+    ),
+        font=("Helvetica", 12),
+        bg="#f0f4f7", fg="black",
+        justify="left",
+        wraplength=480
+    ).pack(padx=10, pady=10)
+    
+    tk.Label(popup, text="⚠️ Note: If 'Prayer Done' is marked 'No', an extra meal penalty is automatically applied.",
+         font=("Helvetica", 12, "bold"),
+         bg="#f0f4f7", fg="red",
+         justify="left",
+         wraplength=480
+    ).pack(padx=10, pady=(0,10),anchor="n")
+    
+    # ---------------- Version Info Section ----------------
+    tk.Label(
+    popup,
+    text="System Version: 1.0 || Developed by BugBusters Team\nContact: 01887538750",
+    font=("Helvetica", 11, "bold italic"),
+    fg="#2c3e50",
+    bg="#f0f4f7",
+    justify="center"
+    ).pack(pady=(20, 8))
+    
+    tk.Button(popup, text="Close", command=popup.destroy,
+              font=("Helvetica", 12, "bold"),
+              padx=10, pady=3,
+              bg="#ff9800", fg="white").pack(pady=10)
+
+# ------------------- Header Help Button -------------------
+tk.Button(header_frame, text="Help", command=show_help,
+          bg="#286CB9", fg="white",
+          font=("Helvetica", 12, "bold"),
+          padx=10, pady=3).pack(side=tk.RIGHT, padx=10)
+
+tk.Button(header_frame, text="Change Theme", command=toggle_theme,
+          bg="#2196F3", fg="white", font=("Helvetica", 12, "bold"),padx=10, pady=3).pack(side=tk.RIGHT, padx=10)
 
 # Entry Frame
 entry_frame = tk.Frame(root, bg=theme["bg"], pady=5)
@@ -313,8 +377,24 @@ tree = ttk.Treeview(table_frame, columns=columns, show="headings")
 
 style = ttk.Style()
 style.theme_use("clam")
-style.configure("Treeview", font=("Helvetica", 9), rowheight=25, fieldbackground="#ffffff")
-style.configure("Treeview.Heading", font=header_font, background="#ffffff", foreground="black")
+style.configure("Treeview",
+                font=("Helvetica", 9),
+                rowheight=25,
+                fieldbackground="white")
+style.configure("Treeview.Heading",
+                font=header_font,
+                background="#ffffff",
+                foreground="black")
+
+tree.tag_configure('oddrow', background='#e0e0e0')
+tree.tag_configure('evenrow', background='#ffffff')
+
+def update_table():
+    for row in tree.get_children():
+        tree.delete(row)
+    for i, row in enumerate(data):
+        tag = 'evenrow' if i % 2 == 0 else 'oddrow'
+        tree.insert("", tk.END, values=row, tags=(tag,))
 
 for col in columns:
     tree.heading(col, text=col)
@@ -330,29 +410,29 @@ update_table()
 summary_frame = tk.Frame(root, bg=theme["bg"], pady=10)
 summary_frame.pack(fill=tk.X, padx=20, pady=10)
 
-# Labels & Entries (Roll, Date, Month, Year) in one row
+for i in range(8):  # 0 to 7 columns
+    summary_frame.columnconfigure(i, weight=1)
+
+# Labels and Entries
 tk.Label(summary_frame, text="Enter Roll for Summary:", font=header_font, bg=theme["bg"], fg=theme["fg"]).grid(row=0, column=0, padx=5, pady=5, sticky="e")
 summary_roll = tk.Entry(summary_frame, font=entry_font)
-summary_roll.grid(row=0, column=1, padx=5, pady=5)
+summary_roll.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
 
 tk.Label(summary_frame, text="Date (YYYY-MM-DD):", font=header_font, bg=theme["bg"], fg=theme["fg"]).grid(row=0, column=2, padx=5, pady=5, sticky="e")
 summary_date = tk.Entry(summary_frame, font=entry_font)
-summary_date.grid(row=0, column=3, padx=5, pady=5)
+summary_date.grid(row=0, column=3, padx=5, pady=5, sticky="ew")
 
 tk.Label(summary_frame, text="Month (1-12):", font=header_font, bg=theme["bg"], fg=theme["fg"]).grid(row=0, column=4, padx=5, pady=5, sticky="e")
 summary_month = tk.Entry(summary_frame, font=entry_font)
-summary_month.grid(row=0, column=5, padx=5, pady=5)
+summary_month.grid(row=0, column=5, padx=5, pady=5, sticky="ew")
 
 tk.Label(summary_frame, text="Year (YYYY):", font=header_font, bg=theme["bg"], fg=theme["fg"]).grid(row=0, column=6, padx=5, pady=5, sticky="e")
 summary_year = tk.Entry(summary_frame, font=entry_font)
-summary_year.grid(row=0, column=7, padx=5, pady=5)
+summary_year.grid(row=0, column=7, padx=5, pady=5, sticky="ew")
 
 # Buttons in separate row (original width)
 tk.Button(summary_frame, text="Show Summary & Chart", command=show_student_summary,
           bg="#ff9800", fg="white", font=("Helvetica", 11, "bold"), width=20, pady=6).grid(row=1, column=0, padx=5, pady=10, sticky="w")          
-
-tk.Button(summary_frame, text="Change Theme", command=toggle_theme,
-          bg="#2196F3", fg="white", font=("Helvetica", 11, "bold"), width=18, pady=6).grid(row=1, column=4, padx=5, pady=10, sticky="e")
 
 # ------------------- New Buttons: Export Month & Clear -------------------
 def export_month_data():
