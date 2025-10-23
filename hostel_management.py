@@ -248,7 +248,7 @@ entry_font = ("Helvetica", 9)
 header_frame = tk.Frame(root, bg="#cce5ff", pady=10)
 header_frame.pack(fill=tk.X, pady=5)
 
-tk.Label(header_frame, text="🏠 Hostel & Mess Management System Center", 
+tk.Label(header_frame, text="🏠 Hostel & Mess Management System",
          font=("Helvetica", 16, "bold"),
          bg="#cce5ff", fg="#1a237e").pack(side=tk.LEFT, padx=16)
 
