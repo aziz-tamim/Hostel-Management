@@ -34,16 +34,30 @@ def has_fixed_cost(roll):
 
 # ------------------- Add Expense -------------------
 def add_expense():
+    global edit_index
     roll = roll_entry.get().strip()
     student = student_name.get().strip()
     religion = religion_var.get()
     prayer_done = prayer_var.get()
     meal_count = meal_count_entry.get().strip()
-
-    if not roll or not student or not religion or not prayer_done:
-        messagebox.showwarning("Warning", "Roll, Student, Religion, Prayer, and Meal Count are required!")
+    meal_count_str = meal_count_entry.get().strip()
+    try:
+        meal_count = int(meal_count_str or 1)
+    except ValueError:
+        messagebox.showwarning("Warning", "Enter a valid number for meal count!")
         return
 
+    if meal_count > 10:
+        response = messagebox.askyesno(
+            "High Meal Count",
+            f"Meal count is {meal_count}, which is unusually high.\nDo you want to proceed?"
+        )
+        if not response:
+            return  # user said No → stop adding
+
+    if not roll or not student or not religion or not prayer_done:
+        messagebox.showwarning("Warning", "All required fields must be filled!")
+        return
     try:
         mess = float(mess_entry.get() or 0)
         hostel = float(hostel_entry.get() or 0)
@@ -55,22 +69,29 @@ def add_expense():
         return
 
     if prayer_done == "No":
-        meal_count += 1  # penalty 1 meal
-
+        meal_count += 1
     mess *= meal_count
 
-    if has_fixed_cost(roll):
-        hostel = electricity = inventory = 0
+    if edit_index is not None:
+        data[edit_index] = [
+            edit_index + 1, roll, student, datetime.now().strftime("%Y-%m-%d"),
+            religion, prayer_done, meal_count, mess, hostel, electricity, inventory
+        ]
+        edit_index = None
+        add_button.config(text="Add Expense")
+        messagebox.showinfo("Success", "Record updated successfully!")
+    else:
+        serial = len(data) + 1
+        data.append([
+            serial, roll, student, datetime.now().strftime("%Y-%m-%d"),
+            religion, prayer_done, meal_count, mess, hostel, electricity, inventory
+        ])
+        messagebox.showinfo("Success", "New expense added!")
 
-    date = datetime.now().strftime("%Y-%m-%d")
-    serial = len(data) + 1
-    data.append([serial, roll, student, date, religion, prayer_done,
-                 meal_count, mess, hostel, electricity, inventory])
     save_data()
     update_table()
-    messagebox.showinfo("Success", f"Expense added for Roll {roll} - {student}")
-    
-    # ------------------ Auto Clear Fields ------------------
+
+    # Clear all entries
     roll_entry.delete(0, tk.END)
     student_name.delete(0, tk.END)
     religion_var.set('')
@@ -80,6 +101,8 @@ def add_expense():
     # hostel_entry.delete(0, tk.END)
     # electricity_entry.delete(0, tk.END)
     # inventory_entry.delete(0, tk.END)
+    total_students_var.set(f"Total Students: {len(data)}")
+    total_cost_var.set(f"Total Cost Today: {sum([float(row[7])+float(row[8])+float(row[9])+float(row[10]) for row in data]):.2f}৳")
 
 # ------------------- Update Table -------------------
 def update_table():
@@ -212,6 +235,34 @@ def show_overall_chart():
     plt.tight_layout()
     plt.show()
 
+def show_notice():
+    notice_win = tk.Toplevel(root)
+    notice_win.title("Notice Board")
+    notice_win.geometry("550x350")
+    notice_win.config(bg="#f0f4f8")
+
+    # Heading
+    tk.Label(
+        notice_win, text="📢 Hostel & Mess Notices", 
+        font=("Helvetica", 16, "bold"), fg="#1a73e8", bg="#f0f4f8"
+    ).pack(pady=15)
+
+    # Notice body
+    notice_text = (
+        "Dear Students,\n\n"
+        "1. Maintenance will be carried out in the hostel on 25th of this month.\n"
+        "2. Mess menu has been updated for this week.\n"
+        "3. Submit your daily meal count before 10 PM to avoid penalties.\n"
+        "4. For any hostel-related issues, contact the admin immediately.\n\n"
+        "Stay safe and take care of your belongings!\n\n"
+        "— Hostel Management Team"
+    )
+    tk.Label(
+        notice_win, text=notice_text, 
+        font=("Helvetica", 12), justify="left", bg="#f0f4f8"
+    ).pack(padx=20, pady=10, anchor="w")
+
+
 # ------------------- Theme -------------------
 def toggle_theme():
     global theme
@@ -233,7 +284,48 @@ def apply_theme():
             label.configure(bg=theme["bg"], fg=theme["fg"])
 
 # ------------------- GUI -------------------
+import tkinter as tk
+import time
+
+splash = tk.Tk()
+splash.overrideredirect(True)
+splash.geometry("500x250+450+200")
+splash.configure(bg="#1E1E2F")  # dark background
+
+tk.Label(splash, text="Hostel & Mess Management System",
+         font=("Helvetica", 18, "bold"),
+         fg="#FFD700",
+         bg="#37375A").pack(expand=True)
+
+tk.Label(splash, text="Loading...",
+         font=("Helvetica", 12),
+         fg="white",
+         bg="#1E1E2F").pack()
+
+# Simple progress effect
+progress = tk.Label(splash, text="", font=("Helvetica", 12),
+                    fg="white", bg="#1E1E2F")
+progress.pack(pady=10)
+
+def animate_progress():
+    for i in range(1, 21):
+        progress.config(text="█" * i)
+        splash.update()
+        time.sleep(0.1)
+    splash.destroy()
+
+splash.after(500, animate_progress)
+splash.mainloop()
+
 root = tk.Tk()
+root.title("Hostel & Mess Management System")
+root.geometry("800x600")
+root.configure(bg="white")
+
+def daily_reminder():
+    messagebox.showinfo("Reminder", "Remember to submit today’s meal count before 10 PM!")
+root.after(1000, daily_reminder)
+
 root.title("Hostel & Mess Management System")
 root.state("zoomed")
 
@@ -314,6 +406,15 @@ tk.Button(header_frame, text="Help", command=show_help,
 tk.Button(header_frame, text="Change Theme", command=toggle_theme,
           bg="#2196F3", fg="white", font=("Helvetica", 12, "bold"),padx=10, pady=3).pack(side=tk.RIGHT, padx=10)
 
+info_frame = tk.Frame(root, bg=theme["bg"])
+info_frame.pack(fill=tk.X, padx=20, pady=5)
+
+total_students_var = tk.StringVar(value=f"Total Students: {len(data)}")
+total_cost_var = tk.StringVar(value=f"Total Cost Today: {sum([float(row[7])+float(row[8])+float(row[9])+float(row[10]) for row in data]):.2f}৳")
+
+tk.Label(info_frame, textvariable=total_students_var, font=("Helvetica",12,"bold"), bg="#4CAF50", fg="white", padx=10, pady=5).pack(side=tk.LEFT, padx=5)
+tk.Label(info_frame, textvariable=total_cost_var, font=("Helvetica",12,"bold"), bg="#2196F3", fg="white", padx=10, pady=5).pack(side=tk.LEFT, padx=5)
+
 # Entry Frame
 entry_frame = tk.Frame(root, bg=theme["bg"], pady=5)
 entry_frame.pack(fill=tk.X, padx=20, pady=10)
@@ -362,11 +463,68 @@ tk.Label(entry_frame, text="Inventory (OT)", font=header_font, bg=theme["bg"], f
 inventory_entry = tk.Entry(entry_frame, font=entry_font)
 inventory_entry.grid(row=2, column=1, padx=5, pady=2)
 
-tk.Button(entry_frame, text="Add Expense", command=add_expense,
-          bg="#4CAF50", fg="white", font=header_font, width=18, pady=5).grid(row=2, column=5, padx=10, pady=5)
+global add_button
+add_button = tk.Button(entry_frame, text="Add Expense", command=add_expense,
+                       bg="#4CAF50", fg="white", font=header_font, width=18, pady=5)
+add_button.grid(row=2, column=5, padx=10, pady=5)
 
 tk.Button(entry_frame, text="Show Overall Cost", command=show_overall_chart,
           bg="#FF5722", fg="white", font=header_font, width=20, pady=5).grid(row=2, column=6, padx=10, pady=5)
+
+edit_index = None  # global variable to track edited row
+
+def edit_record():
+    global edit_index
+    selected = tree.selection()
+    if not selected:
+        messagebox.showwarning("Warning", "Select a row first!")
+        return
+    edit_index = tree.index(selected[0])  # Get index of selected row in Treeview
+    item = data[edit_index]
+
+    # Populate entries with selected row
+    roll_entry.delete(0, tk.END)
+    roll_entry.insert(0, item[1])
+    student_name.delete(0, tk.END)
+    student_name.insert(0, item[2])
+    religion_var.set(item[4])
+    prayer_var.set(item[5])
+    meal_count_entry.delete(0, tk.END)
+    meal_count_entry.insert(0, item[6])
+    mess_entry.delete(0, tk.END)
+    mess_entry.insert(0, item[7])
+    hostel_entry.delete(0, tk.END)
+    hostel_entry.insert(0, item[8])
+    electricity_entry.delete(0, tk.END)
+    electricity_entry.insert(0, item[9])
+    inventory_entry.delete(0, tk.END)
+    inventory_entry.insert(0, item[10])
+
+    add_button.config(text="Save Changes")  # change button text
+
+def delete_record():
+    selected = tree.selection()
+    if not selected:
+        messagebox.showwarning("Warning", "Select a row first!")
+        return
+    item_index = tree.index(selected[0])  # Use index instead of item value
+    item = data[item_index]
+    if messagebox.askyesno("Confirm Delete", f"Delete record for Roll {item[1]}?"):
+        data.pop(item_index)  # remove by index
+        save_data()
+        update_table()
+        messagebox.showinfo("Info", "Record deleted successfully!")
+
+# ------------------- Right-Click Menu -------------------
+menu = tk.Menu(root, tearoff=0)
+menu.add_command(label="Edit", command=edit_record)
+menu.add_command(label="Delete", command=delete_record)
+
+def popup_menu(event):
+    try:
+        menu.tk_popup(event.x_root, event.y_root)
+    finally:
+        menu.grab_release()
 
 # Table Frame
 table_frame = tk.Frame(root, bg=theme["bg"])
@@ -404,6 +562,7 @@ tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=tree.yview)
 tree.configure(yscroll=scrollbar.set)
 scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+tree.bind("<Button-3>", popup_menu)
 update_table()
 
 # ------------------- Summary Frame -------------------
@@ -477,6 +636,12 @@ tk.Label(summary_frame, text="", bg=theme["bg"]).grid(row=1, column=2, padx=50)
 
 tk.Button(summary_frame, text="Clear All Data", command=clear_all_data,
           bg="#F44336", fg="white", font=("Helvetica", 11, "bold"), width=18, pady=6).grid(row=1, column=3, padx=5, pady=10, sticky="e")
+
+# Notice Board button next to Clear All Data
+notice_button = tk.Button(summary_frame, text="Notice Board",
+                          command=lambda: show_notice(),
+                          bg="#F44336", fg="white", font=("Helvetica", 11, "bold"), width=18, pady=6)
+notice_button.grid(row=1, column=4, padx=5, pady=10, sticky="w")
 
 # Run
 root.mainloop()
