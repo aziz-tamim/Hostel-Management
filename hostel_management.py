@@ -274,49 +274,74 @@ def toggle_theme():
 
 def apply_theme():
     root.configure(bg=theme["bg"])
-    for frame in [entry_frame, table_frame, summary_frame, header_frame]:
+    if theme["bg"] == "#2e2e2e":
+        header_frame.configure(bg="black")
+    else:
+        header_frame.configure(bg="#cce5ff")
+    
+    for frame in [entry_frame, table_frame, summary_frame]:
         frame.configure(bg=theme["bg"])
+
     for label in entry_frame.winfo_children():
         if isinstance(label, tk.Label):
             label.configure(bg=theme["bg"], fg=theme["fg"])
     for label in summary_frame.winfo_children():
         if isinstance(label, tk.Label):
             label.configure(bg=theme["bg"], fg=theme["fg"])
-
 # ------------------- GUI -------------------
 import tkinter as tk
 import time
 
+# ---------- Splash Screen ----------
 splash = tk.Tk()
 splash.overrideredirect(True)
-splash.geometry("500x250+450+200")
-splash.configure(bg="#1E1E2F")  # dark background
+splash.geometry("500x280+450+200")
+splash.configure(bg="#1E1E2F")
 
-tk.Label(splash, text="Hostel & Mess Management System",
-         font=("Helvetica", 18, "bold"),
-         fg="#FFD700",
-         bg="#37375A").pack(expand=True)
+# Gradient-style effect using two frames
+top_color = "#2C2C54"
+bottom_color = "#1E1E2F"
+canvas = tk.Canvas(splash, width=500, height=280, highlightthickness=0)
+canvas.pack(fill="both", expand=True)
 
-tk.Label(splash, text="Loading...",
-         font=("Helvetica", 12),
-         fg="white",
-         bg="#1E1E2F").pack()
+for i in range(0, 280):
+    color = f"#{int(30 + (i/280)*20):02x}{int(30 + (i/280)*20):02x}{int(47 + (i/280)*40):02x}"
+    canvas.create_line(0, i, 500, i, fill=color)
 
-# Simple progress effect
-progress = tk.Label(splash, text="", font=("Helvetica", 12),
-                    fg="white", bg="#1E1E2F")
-progress.pack(pady=10)
+# Title text
+title = tk.Label(splash, text="🏠 Hostel & Mess Management System",
+                 font=("Segoe UI", 18, "bold"),
+                 fg="#FFD700", bg="#2C2C54")
+title.place(relx=0.5, rely=0.35, anchor="center")
+
+text = "Please wait, running your Hostel Management System..."
+for offset, color in [(-1, "#111"), (1, "#111"), (0, "#F4FBFA")]:
+    tk.Label(splash, text=text,
+             font=("Calibri", 14, "italic"),
+             fg=color, bg="#1E1E2F").place(relx=0.5 + offset*0.001, rely=0.55 + offset*0.001, anchor="center")
+
+# Loading text
+loading_label = tk.Label(splash, text="Loading...",
+                         font=("Calibri", 12, "bold"),
+                         fg="#00FFAA", bg="#1E1E2F")
+loading_label.place(relx=0.5, rely=0.68, anchor="center")
+
+# Progress bar (animated block style)
+progress = tk.Label(splash, text="", font=("Consolas", 12),
+                    fg="#00FF00", bg="#1E1E2F")
+progress.place(relx=0.5, rely=0.8, anchor="center")
 
 def animate_progress():
     for i in range(1, 21):
         progress.config(text="█" * i)
         splash.update()
-        time.sleep(0.1)
+        time.sleep(0.09)
     splash.destroy()
 
-splash.after(500, animate_progress)
+splash.after(700, animate_progress)
 splash.mainloop()
 
+# ---------- Main Window ----------
 root = tk.Tk()
 root.title("Hostel & Mess Management System")
 root.geometry("800x600")
@@ -335,6 +360,45 @@ data = load_data()
 
 header_font = ("Helvetica", 10, "bold")
 entry_font = ("Helvetica", 9)
+
+def show_exit_splash():
+    exit_splash = tk.Toplevel()
+    exit_splash.overrideredirect(True)
+    exit_splash.geometry("500x250+450+200")
+    exit_splash.configure(bg="#121212")
+
+    # Glow effect: layered labels
+    main_text = "✨ Thank you for using Hostel & Mess Management System"
+    for offset, color in [(-1, "#003333"), (1, "#003333"), (0, "#00FFAA")]:
+        tk.Label(exit_splash, text=main_text,
+                 font=("Segoe UI", 12, "bold"),
+                 fg=color, bg="#121212").place(relx=0.5 + offset*0.002,
+                                                 rely=0.4 + offset*0.002,
+                                                 anchor="center")
+    def pulse(label, alpha=0):
+        alpha += 0.05
+        if alpha > 1:
+            alpha = 0
+        label.configure(fg=f"#{int(204*alpha):02x}{int(204*alpha):02x}{int(204*alpha):02x}")
+        exit_splash.after(100, lambda: pulse(label, alpha))
+
+    sub_label = tk.Label(exit_splash, text="See you next time, happy managing!",
+                        font=("Calibri", 14, "italic"),
+                        fg="#CCCCCC", bg="#121212")
+    sub_label.place(relx=0.5, rely=0.6, anchor="center")
+    pulse(sub_label)
+
+    def fade(alpha=100):
+        if alpha >= 0:
+            exit_splash.attributes("-alpha", alpha/100)
+            exit_splash.after(50, lambda: fade(alpha-5))
+        else:
+            exit_splash.destroy()
+            root.quit()
+
+    exit_splash.after(2300, fade)
+
+root.protocol("WM_DELETE_WINDOW", lambda: [root.withdraw(), show_exit_splash()])
 
 # Header
 header_frame = tk.Frame(root, bg="#cce5ff", pady=10)
