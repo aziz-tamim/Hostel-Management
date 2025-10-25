@@ -53,7 +53,7 @@ def add_expense():
             f"Meal count is {meal_count}, which is unusually high.\nDo you want to proceed?"
         )
         if not response:
-            return  # user said No → stop adding
+            return
 
     if not roll or not student or not religion or not prayer_done:
         messagebox.showwarning("Warning", "All required fields must be filled!")
@@ -288,6 +288,39 @@ def apply_theme():
     for label in summary_frame.winfo_children():
         if isinstance(label, tk.Label):
             label.configure(bg=theme["bg"], fg=theme["fg"])
+            
+# ------------------- Feedback Functions -------------------
+def show_feedback_popup():
+    popup = tk.Toplevel(root)
+    popup.title("Give Feedback")
+    popup.geometry("400x250")
+    popup.configure(bg=theme["bg"])
+
+    tk.Label(popup, text="Your Feedback:", font=("Helvetica",12,"bold"),
+             bg=theme["bg"], fg=theme["fg"]).pack(pady=10)
+
+    feedback_entry = tk.Text(popup, height=8, width=50, font=("Helvetica",10))
+    feedback_entry.pack(pady=5)
+
+    def submit_feedback():
+        feedback = feedback_entry.get("1.0", tk.END).strip()
+        if feedback:
+            with open("feedback.csv", "a", encoding="utf-8", newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow([datetime.now().strftime("%Y-%m-%d %H:%M:%S"), feedback])
+            popup.destroy()
+            show_toast("Feedback submitted. Thank you!")
+        else:
+            messagebox.showwarning("Warning", "Please write something!")
+
+    tk.Button(popup, text="Submit", command=submit_feedback,
+              bg="#4CAF50", fg="white", font=("Helvetica",11,"bold")).pack(pady=10)
+
+def show_toast(msg, duration=2000):
+    toast = tk.Label(root, text=msg, bg="#333", fg="white", font=("Helvetica",10), bd=1, relief="solid")
+    toast.place(relx=0.5, rely=0.05, anchor="n")
+    root.after(duration, lambda: toast.destroy())
+
 # ------------------- GUI -------------------
 import tkinter as tk
 import time
@@ -367,7 +400,6 @@ def show_exit_splash():
     exit_splash.geometry("500x250+450+200")
     exit_splash.configure(bg="#121212")
 
-    # Glow effect: layered labels
     main_text = "✨ Thank you for using Hostel & Mess Management System"
     for offset, color in [(-1, "#003333"), (1, "#003333"), (0, "#00FFAA")]:
         tk.Label(exit_splash, text=main_text,
@@ -396,7 +428,7 @@ def show_exit_splash():
             exit_splash.destroy()
             root.quit()
 
-    exit_splash.after(2300, fade)
+    exit_splash.after(2000, fade)
 
 root.protocol("WM_DELETE_WINDOW", lambda: [root.withdraw(), show_exit_splash()])
 
@@ -469,6 +501,10 @@ tk.Button(header_frame, text="Help", command=show_help,
 
 tk.Button(header_frame, text="Change Theme", command=toggle_theme,
           bg="#2196F3", fg="white", font=("Helvetica", 12, "bold"),padx=10, pady=3).pack(side=tk.RIGHT, padx=10)
+
+# ------------------- Add Feedback Button in Header -------------------
+tk.Button(header_frame, text="Feedback", command=show_feedback_popup,
+          bg="#FF5722", fg="white", font=("Helvetica", 12, "bold"), padx=10, pady=3).pack(side=tk.RIGHT, padx=10)
 
 info_frame = tk.Frame(root, bg=theme["bg"])
 info_frame.pack(fill=tk.X, padx=20, pady=5)
