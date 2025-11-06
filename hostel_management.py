@@ -4,8 +4,200 @@ import csv
 import os
 from datetime import datetime
 import matplotlib.pyplot as plt
-
+from tkinter import messagebox, simpledialog
+from PIL import Image, ImageTk
+import json
+import base64
+import hashlib
+current_user = None
+# ---------- Admin Credential ----------
+ADMIN_USERNAME = "admin"
+ADMIN_PASSWORD = "management2025"
+CRED_FILE = "credentials.json"
 FILE_PATH = "student_expense.csv"
+
+# ---------- Password Hash System ----------
+def hash_password(password, salt=None):
+    if not salt:
+        salt = os.urandom(16)
+    pwd_hash = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, 100000)
+    return base64.b64encode(salt).decode(), base64.b64encode(pwd_hash).decode()
+
+def verify_password(stored_salt, stored_hash, entered_password):
+    salt = base64.b64decode(stored_salt.encode())
+    pwd_hash = hashlib.pbkdf2_hmac('sha256', entered_password.encode(), salt, 100000)
+    return base64.b64encode(pwd_hash).decode() == stored_hash
+
+def load_credentials():
+    if os.path.exists(CRED_FILE):
+        with open(CRED_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+
+def save_credentials(data):
+    with open(CRED_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=4)
+
+def save_current_user(username):
+    with open("current_user.json", "w") as f:
+        json.dump({"username": username}, f)
+
+def load_current_user():
+    if os.path.exists("current_user.json"):
+        with open("current_user.json") as f:
+            data = json.load(f)
+            return data.get("username")
+    return None
+
+# ---------- Login Window ----------
+def login_popup(root, enable_callback, show_user_profile):
+    def attempt_login():
+        global current_user
+        username = user_entry.get().strip()
+        password = pass_entry.get().strip()
+
+        if not username or not password:
+            messagebox.showerror("Error", "Please enter username and password!")
+            return
+
+        # Admin Login
+        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
+            current_user = username
+            messagebox.showinfo("Success", "Admin login successful!")
+            login_win.destroy()
+            enable_callback()
+            show_user_profile(username)
+            return
+        # Normal User Login
+        creds = load_credentials()
+
+        if username in creds:
+            stored = creds[username]
+            if verify_password(stored["salt"], stored["hash"], password):
+                current_user = username
+                save_current_user(username)
+                messagebox.showinfo("Success", f"{stored['name']} logged in!")
+                login_win.destroy()
+                enable_callback()
+                show_user_profile(username)
+            else:
+                messagebox.showerror("Error", "Incorrect password!")
+        else:
+            salt, pwd_hash = hash_password(password)
+            creds[username] = {"name": username, "salt": salt, "hash": pwd_hash}
+            save_credentials(creds)
+            current_user = username
+            save_current_user(username)
+            messagebox.showinfo("Success", f"New user {username} created and logged in!")
+            login_win.destroy()
+            enable_callback()
+            show_user_profile(username)
+
+    login_win = tk.Toplevel(root)
+    login_win.title("Login")
+    login_win.geometry("300x200")
+    login_win.resizable(False, False)
+    login_win.grab_set()
+
+    tk.Label(login_win, text="Username:").pack(pady=5)
+    user_entry = tk.Entry(login_win)
+    user_entry.pack(pady=5)
+
+    tk.Label(login_win, text="Password:").pack(pady=5)
+    pass_entry = tk.Entry(login_win, show="*")
+    pass_entry.pack(pady=5)
+
+    tk.Button(login_win, text="Login", command=attempt_login, bg="#4CAF50", fg="white").pack(pady=10)
+
+# ---------- Show User Profile ----------
+def show_user_profile(username):
+    global profile_btn, login_btn
+    login_btn.pack_forget()  # Hide login button
+
+    try:
+        img = Image.open("default_user.png")
+        img = img.resize((40, 40))
+        img = ImageTk.PhotoImage(img)
+    except Exception as e:
+        messagebox.showerror("Error", f"Could not load profile image: {e}")
+        return
+
+    profile_btn = tk.Button(header_frame, image=img, bd=0, command=lambda: user_menu(username))
+    profile_btn.image = img
+    profile_btn.pack(side=tk.RIGHT, padx=10)
+
+# ---------- User Menu ----------
+def user_menu(username):
+    menu = tk.Menu(root, tearoff=0,
+                   bg="#fff5f5",
+                   fg="black",
+                   activebackground="white",
+                   activeforeground="black")
+
+    menu.add_command(label=f"User: {username}", state="disabled")
+    menu.add_separator()
+    menu.add_command(label="Logout", command=logout)
+
+    menu.tk_popup(profile_btn.winfo_rootx(), profile_btn.winfo_rooty() + profile_btn.winfo_height())
+
+# ---------- Logout ----------
+def logout():
+    global current_user
+    current_user = None
+    profile_btn.pack_forget()
+    login_btn.pack(side=tk.RIGHT, padx=10)
+    disable_features()
+    messagebox.showinfo("Logout", "You have been logged out.")
+    
+# ---------- Enable/Disable Main Features ----------
+def enable_features():
+    overall_cst.config(state=tk.NORMAL)
+    add_button.config(state=tk.NORMAL)
+    inverntory.config(state=tk.NORMAL)
+    electricity.config(state=tk.NORMAL)
+    sit_cost.config(state=tk.NORMAL)
+    meal_expense.config(state=tk.NORMAL)
+    meal_cnt.config(state=tk.NORMAL)
+    prayer_done.config(state=tk.NORMAL)
+    religions.config(state=tk.NORMAL)
+    std_name.config(state=tk.NORMAL)
+    std_roll.config(state=tk.NORMAL)
+    feedback_btn.config(state=tk.NORMAL)
+    chng_theme.config(state=tk.NORMAL)
+    help_btn.config(state=tk.NORMAL)
+    std_roll_smary.config(state=tk.NORMAL)
+    std_d_m_y.config(state=tk.NORMAL)
+    std_month.config(state=tk.NORMAL)
+    std_year.config(state=tk.NORMAL)
+    std_summary_chart.config(state=tk.NORMAL)
+    export_mnt_dt.config(state=tk.NORMAL)
+    dta_clr.config(state=tk.NORMAL)
+    notice_button.config(state=tk.NORMAL)
+    
+# ---------- Enable/Disable Main Features ----------
+def disable_features():
+    overall_cst.config(state=tk.DISABLED)
+    add_button.config(state=tk.DISABLED)
+    inverntory.config(state=tk.DISABLED)
+    electricity.config(state=tk.DISABLED)
+    sit_cost.config(state=tk.DISABLED)
+    meal_expense.config(state=tk.DISABLED)
+    meal_cnt.config(state=tk.DISABLED)
+    prayer_done.config(state=tk.DISABLED)
+    religions.config(state=tk.DISABLED)
+    std_name.config(state=tk.DISABLED)
+    std_roll.config(state=tk.DISABLED)
+    feedback_btn.config(state=tk.DISABLED)
+    chng_theme.config(state=tk.DISABLED)
+    help_btn.config(state=tk.DISABLED)
+    std_roll_smary.config(state=tk.DISABLED)
+    std_d_m_y.config(state=tk.DISABLED)
+    std_month.config(state=tk.DISABLED)
+    std_year.config(state=tk.DISABLED)
+    std_summary_chart.config(state=tk.DISABLED)
+    export_mnt_dt.config(state=tk.DISABLED)
+    dta_clr.config(state=tk.DISABLED)
+    notice_button.config(state=tk.DISABLED)
 
 # ------------------- Data Handling -------------------
 def load_data():
@@ -324,7 +516,6 @@ def show_toast(msg, duration=2000):
 # ------------------- GUI -------------------
 import tkinter as tk
 import time
-
 # ---------- Splash Screen ----------
 splash = tk.Tk()
 splash.overrideredirect(True)
@@ -379,6 +570,9 @@ root = tk.Tk()
 root.title("Hostel & Mess Management System")
 root.geometry("800x600")
 root.configure(bg="white")
+
+header_frame = tk.Frame(root, bg="#eee")
+header_frame.pack(fill=tk.X)
 
 def daily_reminder():
     messagebox.showinfo("Reminder", "Remember to submit today’s meal count before 10 PM!")
@@ -457,13 +651,14 @@ def show_help():
     ).pack(fill=tk.X, pady=(10,15))
     tk.Label(popup, text=(
         "Instructions for Students:\n\n"
-        "1. Fill in your Roll Number and Full Name.\n"
-        "2. Select your Religion and indicate if Prayer was done.\n"
-        "3. Enter the number of meals taken.\n"
-        "4. Provide numeric values for Mess, Hostel, Electricity, and Inventory costs.\n"
-        "5. Click 'Add Expense' to save your daily records.\n"
-        "6. Use 'Show Overall Cost' to view the total expenses for all students.\n"
-        "7. Use the 'Summary' section to view student-wise expense breakdown and charts.\n"
+        "1. First, log in using your username and password.\n"
+        "2. Fill in your Roll Number and Full Name.\n"
+        "3. Select your Religion and indicate if Prayer was done.\n"
+        "4. Enter the number of meals taken.\n"
+        "5. Provide numeric values for Mess, Hostel, Electricity, and Inventory costs.\n"
+        "6. Click 'Add Expense' to save your daily records.\n"
+        "7. Use 'Show Overall Cost' to view the total expenses for all students.\n"
+        "8. Use the 'Summary' section to view student-wise expense breakdown and charts.\n"
     ),
         font=("Helvetica", 12),
         bg="#f0f4f7", fg="black",
@@ -494,17 +689,32 @@ def show_help():
               bg="#ff9800", fg="white").pack(pady=10)
 
 # ------------------- Header Help Button -------------------
-tk.Button(header_frame, text="Help", command=show_help,
-          bg="#286CB9", fg="white",
+help_btn = tk.Button(header_frame, text="Help", command=show_help,
+          bg="#286CB9", fg="white", disabledforeground="#bebebe",
           font=("Helvetica", 12, "bold"),
-          padx=10, pady=3).pack(side=tk.RIGHT, padx=10)
+          padx=10, pady=3)
+help_btn.pack(side=tk.RIGHT, padx=10)
 
-tk.Button(header_frame, text="Change Theme", command=toggle_theme,
-          bg="#2196F3", fg="white", font=("Helvetica", 12, "bold"),padx=10, pady=3).pack(side=tk.RIGHT, padx=10)
+chng_theme = tk.Button(header_frame, text="Change Theme", command=toggle_theme,
+          bg="#2196F3", disabledforeground="#bebebe", fg="white", font=("Helvetica", 12, "bold"),padx=10, pady=3)
+chng_theme.pack(side=tk.RIGHT, padx=10)
 
 # ------------------- Add Feedback Button in Header -------------------
-tk.Button(header_frame, text="Feedback", command=show_feedback_popup,
-          bg="#FF5722", fg="white", font=("Helvetica", 12, "bold"), padx=10, pady=3).pack(side=tk.RIGHT, padx=10)
+feedback_btn = tk.Button(header_frame, text="Feedback", command=show_feedback_popup,
+          bg="#FF5722", disabledforeground="#bebebe", fg="white", font=("Helvetica", 12, "bold"), padx=10, pady=3)
+feedback_btn.pack(side=tk.RIGHT, padx=10)
+
+login_btn = tk.Button(
+    header_frame,
+    bg="#4CAF50",
+    text="Login",
+    command=lambda: login_popup(root, enable_features, show_user_profile),
+    font=("Helvetica", 12, "bold"),
+    padx=10,
+    pady=3
+)
+login_btn.pack(side=tk.RIGHT, padx=10)
+
 
 info_frame = tk.Frame(root, bg=theme["bg"])
 info_frame.pack(fill=tk.X, padx=20, pady=5)
@@ -519,7 +729,8 @@ tk.Label(info_frame, textvariable=total_cost_var, font=("Helvetica",12,"bold"), 
 entry_frame = tk.Frame(root, bg=theme["bg"], pady=5)
 entry_frame.pack(fill=tk.X, padx=20, pady=10)
 
-tk.Label(entry_frame, text="Roll", font=header_font, bg=theme["bg"], fg=theme["fg"]).grid(row=0, column=0, padx=5, pady=2, sticky="w")
+std_roll = tk.Label(entry_frame, text="Roll", font=header_font, bg=theme["bg"], fg=theme["fg"])
+std_roll.grid(row=0, column=0, padx=5, pady=2, sticky="w")
 def only_numbers(char):
     return char.isdigit()
 roll_entry = tk.Entry(entry_frame, font=entry_font, validate="key")
@@ -527,51 +738,60 @@ roll_entry['validatecommand'] = (roll_entry.register(only_numbers), '%S')
 roll_entry.grid(row=0, column=1, padx=5, pady=2)
 
 
-tk.Label(entry_frame, text="Student Name", font=header_font, bg=theme["bg"], fg=theme["fg"]).grid(row=0, column=2, padx=5, pady=2, sticky="w")
+std_name = tk.Label(entry_frame, text="Student Name", font=header_font, bg=theme["bg"], fg=theme["fg"])
+std_name.grid(row=0, column=2, padx=5, pady=2, sticky="w")
 student_name = tk.Entry(entry_frame, font=entry_font)
 student_name.grid(row=0, column=3, padx=5, pady=2)
 
-tk.Label(entry_frame, text="Religion", font=header_font, bg=theme["bg"], fg=theme["fg"]).grid(row=0, column=4, padx=5, pady=2, sticky="w")
+religions = tk.Label(entry_frame, text="Religion", font=header_font, bg=theme["bg"], fg=theme["fg"])
+religions.grid(row=0, column=4, padx=5, pady=2, sticky="w")
 religion_var = tk.StringVar()
 religion_menu = ttk.Combobox(entry_frame, textvariable=religion_var, state="readonly",
                              values=["Hindu", "Muslim", "Aboriginal"], font=entry_font)
 religion_menu.grid(row=0, column=5, padx=5, pady=2)
 
-tk.Label(entry_frame, text="Prayer Done?", font=header_font, bg=theme["bg"], fg=theme["fg"]).grid(row=0, column=6, padx=5, pady=2, sticky="w")
+prayer_done = tk.Label(entry_frame, text="Prayer Done?", font=header_font, bg=theme["bg"], fg=theme["fg"])
+prayer_done.grid(row=0, column=6, padx=5, pady=2, sticky="w")
 prayer_var = tk.StringVar()
 prayer_menu = ttk.Combobox(entry_frame, textvariable=prayer_var, state="readonly",
                            values=["Yes", "No"], font=entry_font)
 prayer_menu.grid(row=0, column=7, padx=5, pady=2)
 
-tk.Label(entry_frame, text="Meal Count", font=header_font, bg=theme["bg"], fg=theme["fg"]).grid(row=1, column=0, padx=5, pady=2, sticky="w")
+meal_cnt = tk.Label(entry_frame, text="Meal Count", font=header_font, bg=theme["bg"], fg=theme["fg"])
+meal_cnt.grid(row=1, column=0, padx=5, pady=2, sticky="w")
 meal_count_entry = tk.Entry(entry_frame, font=entry_font)
 meal_count_entry.grid(row=1, column=1, padx=5, pady=2)
 
-tk.Label(entry_frame, text="Meal Expenses", font=header_font, bg=theme["bg"], fg=theme["fg"]).grid(row=1, column=2, padx=5, pady=2, sticky="w")
+meal_expense = tk.Label(entry_frame, text="Meal Expenses", font=header_font, bg=theme["bg"], fg=theme["fg"])
+meal_expense.grid(row=1, column=2, padx=5, pady=2, sticky="w")
 mess_entry = tk.Entry(entry_frame, font=entry_font)
 mess_entry.grid(row=1, column=3, padx=5, pady=2)
 
-tk.Label(entry_frame, text="Hostel Sit Cost (OT)", font=header_font, bg=theme["bg"], fg=theme["fg"]).grid(row=1, column=4, padx=5, pady=2, sticky="w")
+sit_cost = tk.Label(entry_frame, text="Hostel Sit Cost (OT)", font=header_font, bg=theme["bg"], fg=theme["fg"])
+sit_cost.grid(row=1, column=4, padx=5, pady=2, sticky="w")
 hostel_entry = tk.Entry(entry_frame, font=entry_font)
 hostel_entry.grid(row=1, column=5, padx=5, pady=2)
 
-tk.Label(entry_frame, text="Electricity (OT)", font=header_font, bg=theme["bg"], fg=theme["fg"]).grid(row=1, column=6, padx=5, pady=2, sticky="w")
+electricity = tk.Label(entry_frame, text="Electricity (OT)", font=header_font, bg=theme["bg"], fg=theme["fg"])
+electricity.grid(row=1, column=6, padx=5, pady=2, sticky="w")
 electricity_entry = tk.Entry(entry_frame, font=entry_font)
 electricity_entry.grid(row=1, column=7, padx=5, pady=2)
 
-tk.Label(entry_frame, text="Inventory (OT)", font=header_font, bg=theme["bg"], fg=theme["fg"]).grid(row=2, column=0, padx=5, pady=2, sticky="w")
+inverntory = tk.Label(entry_frame, text="Inventory (OT)", font=header_font, bg=theme["bg"], fg=theme["fg"])
+inverntory.grid(row=2, column=0, padx=5, pady=2, sticky="w")
 inventory_entry = tk.Entry(entry_frame, font=entry_font)
 inventory_entry.grid(row=2, column=1, padx=5, pady=2)
 
 global add_button
 add_button = tk.Button(entry_frame, text="Add Expense", command=add_expense,
-                       bg="#4CAF50", fg="white", font=header_font, width=18, pady=5)
+                       bg="#4CAF50", fg="white", disabledforeground="#bebebe", font=header_font, width=18, pady=5)
 add_button.grid(row=2, column=5, padx=10, pady=5)
 
-tk.Button(entry_frame, text="Show Overall Cost", command=show_overall_chart,
-          bg="#FF5722", fg="white", font=header_font, width=20, pady=5).grid(row=2, column=6, padx=10, pady=5)
+overall_cst = tk.Button(entry_frame, text="Show Overall Cost", command=show_overall_chart,
+          bg="#FF5722", fg="white", disabledforeground="#bebebe", font=header_font, width=20, pady=5)
+overall_cst.grid(row=2, column=6, padx=10, pady=5)
 
-edit_index = None  # global variable to track edited row
+edit_index = None
 
 def edit_record():
     global edit_index
@@ -579,10 +799,9 @@ def edit_record():
     if not selected:
         messagebox.showwarning("Warning", "Select a row first!")
         return
-    edit_index = tree.index(selected[0])  # Get index of selected row in Treeview
+    edit_index = tree.index(selected[0])
     item = data[edit_index]
 
-    # Populate entries with selected row
     roll_entry.delete(0, tk.END)
     roll_entry.insert(0, item[1])
     student_name.delete(0, tk.END)
@@ -600,17 +819,17 @@ def edit_record():
     inventory_entry.delete(0, tk.END)
     inventory_entry.insert(0, item[10])
 
-    add_button.config(text="Save Changes")  # change button text
+    add_button.config(text="Save Changes")
 
 def delete_record():
     selected = tree.selection()
     if not selected:
         messagebox.showwarning("Warning", "Select a row first!")
         return
-    item_index = tree.index(selected[0])  # Use index instead of item value
+    item_index = tree.index(selected[0])
     item = data[item_index]
     if messagebox.askyesno("Confirm Delete", f"Delete record for Roll {item[1]}?"):
-        data.pop(item_index)  # remove by index
+        data.pop(item_index)
         save_data()
         update_table()
         messagebox.showinfo("Info", "Record deleted successfully!")
@@ -669,29 +888,34 @@ update_table()
 summary_frame = tk.Frame(root, bg=theme["bg"], pady=10)
 summary_frame.pack(fill=tk.X, padx=20, pady=10)
 
-for i in range(8):  # 0 to 7 columns
+for i in range(8):
     summary_frame.columnconfigure(i, weight=1)
 
 # Labels and Entries
-tk.Label(summary_frame, text="Enter Roll for Summary:", font=header_font, bg=theme["bg"], fg=theme["fg"]).grid(row=0, column=0, padx=5, pady=5, sticky="e")
+std_roll_smary = tk.Label(summary_frame, text="Enter Roll for Summary:", font=header_font, bg=theme["bg"], fg=theme["fg"])
+std_roll_smary.grid(row=0, column=0, padx=5, pady=5, sticky="e")
 summary_roll = tk.Entry(summary_frame, font=entry_font)
 summary_roll.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
 
-tk.Label(summary_frame, text="Date (YYYY-MM-DD):", font=header_font, bg=theme["bg"], fg=theme["fg"]).grid(row=0, column=2, padx=5, pady=5, sticky="e")
+std_d_m_y = tk.Label(summary_frame, text="Date (YYYY-MM-DD):", font=header_font, bg=theme["bg"], fg=theme["fg"])
+std_d_m_y.grid(row=0, column=2, padx=5, pady=5, sticky="e")
 summary_date = tk.Entry(summary_frame, font=entry_font)
 summary_date.grid(row=0, column=3, padx=5, pady=5, sticky="ew")
 
-tk.Label(summary_frame, text="Month (1-12):", font=header_font, bg=theme["bg"], fg=theme["fg"]).grid(row=0, column=4, padx=5, pady=5, sticky="e")
+std_month = tk.Label(summary_frame, text="Month (1-12):", font=header_font, bg=theme["bg"], fg=theme["fg"])
+std_month.grid(row=0, column=4, padx=5, pady=5, sticky="e")
 summary_month = tk.Entry(summary_frame, font=entry_font)
 summary_month.grid(row=0, column=5, padx=5, pady=5, sticky="ew")
 
-tk.Label(summary_frame, text="Year (YYYY):", font=header_font, bg=theme["bg"], fg=theme["fg"]).grid(row=0, column=6, padx=5, pady=5, sticky="e")
+std_year = tk.Label(summary_frame, text="Year (YYYY):", font=header_font, bg=theme["bg"], fg=theme["fg"])
+std_year.grid(row=0, column=6, padx=5, pady=5, sticky="e")
 summary_year = tk.Entry(summary_frame, font=entry_font)
 summary_year.grid(row=0, column=7, padx=5, pady=5, sticky="ew")
 
 # Buttons in separate row (original width)
-tk.Button(summary_frame, text="Show Summary & Chart", command=show_student_summary,
-          bg="#ff9800", fg="white", font=("Helvetica", 11, "bold"), width=20, pady=6).grid(row=1, column=0, padx=5, pady=10, sticky="w")          
+std_summary_chart = tk.Button(summary_frame, text="Show Summary & Chart", command=show_student_summary,
+          bg="#ff9800", fg="white", disabledforeground="#bebebe", font=("Helvetica", 11, "bold"), width=20, pady=6)
+std_summary_chart.grid(row=1, column=0, padx=5, pady=10, sticky="w")          
 
 # ------------------- New Buttons: Export Month & Clear -------------------
 def export_month_data():
@@ -728,20 +952,31 @@ def clear_all_data():
         update_table()
         messagebox.showinfo("Info", "All data cleared successfully!")
 
-tk.Button(summary_frame, text="Export Month Data", command=export_month_data,
-          bg="#4CAF50", fg="white", font=("Helvetica", 11, "bold"), width=18, pady=6).grid(row=1, column=1, padx=5, pady=10, sticky="w")
+export_mnt_dt = tk.Button(summary_frame, text="Export Month Data", command=export_month_data,
+          bg="#4CAF50", fg="white", disabledforeground="#bebebe", font=("Helvetica", 11, "bold"), width=18, pady=6)
+export_mnt_dt.grid(row=1, column=1, padx=5, pady=10, sticky="w")
           
 # Empty column to create space between left and right buttons
 tk.Label(summary_frame, text="", bg=theme["bg"]).grid(row=1, column=2, padx=50)
 
-tk.Button(summary_frame, text="Clear All Data", command=clear_all_data,
-          bg="#F44336", fg="white", font=("Helvetica", 11, "bold"), width=18, pady=6).grid(row=1, column=3, padx=5, pady=10, sticky="e")
+dta_clr = tk.Button(summary_frame, text="Clear All Data", command=clear_all_data,
+          bg="#F44336", fg="white", disabledforeground="#bebebe", font=("Helvetica", 11, "bold"), width=18, pady=6)
+dta_clr.grid(row=1, column=3, padx=5, pady=10, sticky="e")
 
 # Notice Board button next to Clear All Data
 notice_button = tk.Button(summary_frame, text="Notice Board",
                           command=lambda: show_notice(),
-                          bg="#F44336", fg="white", font=("Helvetica", 11, "bold"), width=18, pady=6)
+                          bg="#F44336", disabledforeground="#bebebe", fg="white", font=("Helvetica", 11, "bold"), width=18, pady=6)
 notice_button.grid(row=1, column=4, padx=5, pady=10, sticky="w")
 
-# Run
+current_user = load_current_user()
+
+if current_user:
+    login_btn.pack_forget()
+    enable_features()
+    show_user_profile(current_user)
+else:
+    disable_features()
+
+# Run This is important part. this call not be missed.
 root.mainloop()
