@@ -10,7 +10,7 @@ import json
 import base64
 import hashlib
 current_user = None
-# ---------- Admin Credential ----------
+# ---------- Admin Credential ---------- #
 ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "management2025"
 CRED_FILE = "credentials.json"
@@ -49,7 +49,7 @@ def load_current_user():
             return data.get("username")
     return None
 
-# ---------- Login Window ----------
+# ---------- Login Window ---------- #
 def login_popup(root, enable_callback, show_user_profile):
     def attempt_login():
         global current_user
@@ -109,7 +109,7 @@ def login_popup(root, enable_callback, show_user_profile):
 
     tk.Button(login_win, text="Login", command=attempt_login, bg="#4CAF50", fg="white").pack(pady=10)
 
-# ---------- Show User Profile ----------
+# ---------- Show User Profile ---------- #
 def show_user_profile(username):
     global profile_btn, login_btn
     login_btn.pack_forget()  # Hide login button
@@ -126,7 +126,7 @@ def show_user_profile(username):
     profile_btn.image = img
     profile_btn.pack(side=tk.RIGHT, padx=10)
 
-# ---------- User Menu ----------
+# ---------- User Menu ---------- #
 def user_menu(username):
     menu = tk.Menu(root, tearoff=0,
                    bg="#fff5f5",
@@ -140,7 +140,7 @@ def user_menu(username):
 
     menu.tk_popup(profile_btn.winfo_rootx(), profile_btn.winfo_rooty() + profile_btn.winfo_height())
 
-# ---------- Logout ----------
+# ---------- Logout ---------- #
 def logout():
     global current_user
     current_user = None
@@ -149,7 +149,7 @@ def logout():
     disable_features()
     messagebox.showinfo("Logout", "You have been logged out.")
     
-# ---------- Enable/Disable Main Features ----------
+# ---------- Enable/Disable Main Features ---------- #
 def enable_features():
     overall_cst.config(state=tk.NORMAL)
     add_button.config(state=tk.NORMAL)
@@ -174,7 +174,7 @@ def enable_features():
     dta_clr.config(state=tk.NORMAL)
     notice_button.config(state=tk.NORMAL)
     
-# ---------- Enable/Disable Main Features ----------
+# ---------- Enable/Disable Main Features ---------- #
 def disable_features():
     overall_cst.config(state=tk.DISABLED)
     add_button.config(state=tk.DISABLED)
@@ -199,7 +199,7 @@ def disable_features():
     dta_clr.config(state=tk.DISABLED)
     notice_button.config(state=tk.DISABLED)
 
-# ------------------- Data Handling -------------------
+# ------------------- Data Handling ------------------- #
 def load_data():
     data_list = []
     if os.path.exists(FILE_PATH):
@@ -224,7 +224,7 @@ def has_fixed_cost(roll):
             return True
     return False
 
-# ------------------- Add Expense -------------------
+# ------------------- Add Expense ------------------- #
 def add_expense():
     global edit_index
     roll = roll_entry.get().strip()
@@ -296,14 +296,14 @@ def add_expense():
     total_students_var.set(f"Total Students: {len(data)}")
     total_cost_var.set(f"Total Cost Today: {sum([float(row[7])+float(row[8])+float(row[9])+float(row[10]) for row in data]):.2f}৳")
 
-# ------------------- Update Table -------------------
+# ------------------- Update Table ------------------- #
 def update_table():
     for row in tree.get_children():
         tree.delete(row)
     for row in data:
         tree.insert("", tk.END, values=row)
 
-# ------------------- Show Student Summary -------------------
+# ------------------- Show Student Summary ------------------- #
 def show_student_summary():
     roll = summary_roll.get().strip()
     date_filter = summary_date.get().strip()
@@ -350,7 +350,7 @@ def show_student_summary():
         messagebox.showinfo("Info", "No data found for the given filter!")
         return
 
-    # --- Remaining code same as before ---
+    # --- Remaining code same as before --- #
     total_mess = total_hostel = total_electricity = total_inventory = total_penalty = 0
     student_name_val = student_data[0][2]
 
@@ -455,7 +455,7 @@ def show_notice():
     ).pack(padx=20, pady=10, anchor="w")
 
 
-# ------------------- Theme -------------------
+# ------------------- Theme ------------------- #
 def toggle_theme():
     global theme
     if theme["bg"] == "#f0f4f7":
@@ -481,7 +481,7 @@ def apply_theme():
         if isinstance(label, tk.Label):
             label.configure(bg=theme["bg"], fg=theme["fg"])
             
-# ------------------- Feedback Functions -------------------
+# ------------------- Feedback Functions ------------------- #
 def show_feedback_popup():
     popup = tk.Toplevel(root)
     popup.title("Give Feedback")
@@ -513,10 +513,10 @@ def show_toast(msg, duration=2000):
     toast.place(relx=0.5, rely=0.05, anchor="n")
     root.after(duration, lambda: toast.destroy())
 
-# ------------------- GUI -------------------
+# ------------------- GUI ------------------- #
 import tkinter as tk
 import time
-# ---------- Splash Screen ----------
+# ---------- Splash Screen ---------- #
 splash = tk.Tk()
 splash.overrideredirect(True)
 splash.geometry("500x280+450+200")
@@ -565,7 +565,7 @@ def animate_progress():
 splash.after(700, animate_progress)
 splash.mainloop()
 
-# ---------- Main Window ----------
+# ---------- Main Window ---------- #
 root = tk.Tk()
 root.title("Hostel & Mess Management System")
 root.geometry("800x600")
@@ -634,7 +634,7 @@ tk.Label(header_frame, text="🏠 Hostel & Mess Management System",
          font=("Helvetica", 16, "bold"),
          bg="#cce5ff", fg="#1a237e").pack(side=tk.LEFT, padx=16)
 
-# ------------------- Help Button -------------------
+# ------------------- Help Button ------------------- #
 def show_help():
     popup = tk.Toplevel(root)
     popup.title("Help")
@@ -673,7 +673,7 @@ def show_help():
          wraplength=480
     ).pack(padx=10, pady=(0,10),anchor="n")
     
-    # ---------------- Version Info Section ----------------
+    # ---------------- Version Info Section ---------------- #
     tk.Label(
     popup,
     text="System Version: 1.0 || Developed by BugBusters Team\nContact: 01887538750",
@@ -688,7 +688,7 @@ def show_help():
               padx=10, pady=3,
               bg="#ff9800", fg="white").pack(pady=10)
 
-# ------------------- Header Help Button -------------------
+# ------------------- Header Help Button ------------------- #
 help_btn = tk.Button(header_frame, text="Help", command=show_help,
           bg="#286CB9", fg="white", disabledforeground="#bebebe",
           font=("Helvetica", 12, "bold"),
@@ -699,7 +699,7 @@ chng_theme = tk.Button(header_frame, text="Change Theme", command=toggle_theme,
           bg="#2196F3", disabledforeground="#bebebe", fg="white", font=("Helvetica", 12, "bold"),padx=10, pady=3)
 chng_theme.pack(side=tk.RIGHT, padx=10)
 
-# ------------------- Add Feedback Button in Header -------------------
+# ------------------- Add Feedback Button in Header ------------------- #
 feedback_btn = tk.Button(header_frame, text="Feedback", command=show_feedback_popup,
           bg="#FF5722", disabledforeground="#bebebe", fg="white", font=("Helvetica", 12, "bold"), padx=10, pady=3)
 feedback_btn.pack(side=tk.RIGHT, padx=10)
@@ -834,7 +834,7 @@ def delete_record():
         update_table()
         messagebox.showinfo("Info", "Record deleted successfully!")
 
-# ------------------- Right-Click Menu -------------------
+# ------------------- Right-Click Menu ------------------- #
 menu = tk.Menu(root, tearoff=0)
 menu.add_command(label="Edit", command=edit_record)
 menu.add_command(label="Delete", command=delete_record)
@@ -884,7 +884,7 @@ scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 tree.bind("<Button-3>", popup_menu)
 update_table()
 
-# ------------------- Summary Frame -------------------
+# ------------------- Summary Frame ------------------- #
 summary_frame = tk.Frame(root, bg=theme["bg"], pady=10)
 summary_frame.pack(fill=tk.X, padx=20, pady=10)
 
@@ -917,7 +917,7 @@ std_summary_chart = tk.Button(summary_frame, text="Show Summary & Chart", comman
           bg="#ff9800", fg="white", disabledforeground="#bebebe", font=("Helvetica", 11, "bold"), width=20, pady=6)
 std_summary_chart.grid(row=1, column=0, padx=5, pady=10, sticky="w")          
 
-# ------------------- New Buttons: Export Month & Clear -------------------
+# ------------ New Buttons: Export Month & Clear ------------ #
 def export_month_data():
     month_filter = summary_month.get().strip()
     year_filter = summary_year.get().strip()
