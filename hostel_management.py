@@ -16,7 +16,7 @@ ADMIN_PASSWORD = "management2025"
 CRED_FILE = "credentials.json"
 FILE_PATH = "student_expense.csv"
 
-# ---------- Password Hash System ----------
+# ---------- Password Hash System ---------- #
 def hash_password(password, salt=None):
     if not salt:
         salt = os.urandom(16)
