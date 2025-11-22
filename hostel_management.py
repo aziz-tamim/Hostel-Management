@@ -148,7 +148,7 @@ def logout():
     login_btn.pack(side=tk.RIGHT, padx=10)
     disable_features()
     messagebox.showinfo("Logout", "You have been logged out.")
-    
+
 # ---------- Enable/Disable Main Features ---------- #
 def enable_features():
     overall_cst.config(state=tk.NORMAL)
@@ -173,7 +173,7 @@ def enable_features():
     export_mnt_dt.config(state=tk.NORMAL)
     dta_clr.config(state=tk.NORMAL)
     notice_button.config(state=tk.NORMAL)
-    
+
 # ---------- Enable/Disable Main Features ---------- #
 def disable_features():
     overall_cst.config(state=tk.DISABLED)
