@@ -13,3 +13,6 @@ Serial,Roll,Student,Date,Religion,PrayerDone,MealCount,Mess,Hostel,Electricity,I
 12,19,prithom,2025-10-22,Hindu,Yes,3,105.0,0,0,0
 13,50,arjo,2025-10-22,Aboriginal,Yes,3,105.0,1200.0,100.0,100.0
 14,50,arjo,2025-10-22,Aboriginal,No,5,175.0,0,0,0
+15,53,chadni,2025-11-23,Muslim,No,4,140.0,1200.0,120.0,120.0
+16,879954,Abdul Aziz,2025-11-23,Muslim,Yes,3,315.0,1200.0,120.0,100.0
+17,879954,Abdul Aziz,2025-11-23,Muslim,Yes,3,105.0,1200.0,120.0,100.0

@@ -63,35 +63,20 @@ def login_popup(root, enable_callback, show_user_profile):
         # Admin Login
         if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
             current_user = username
+            save_current_user(username)
             messagebox.showinfo("Success", "Admin login successful!")
             login_win.destroy()
             enable_callback()
             show_user_profile(username)
             return
-        # Normal User Login
-        creds = load_credentials()
 
-        if username in creds:
-            stored = creds[username]
-            if verify_password(stored["salt"], stored["hash"], password):
-                current_user = username
-                save_current_user(username)
-                messagebox.showinfo("Success", f"{stored['name']} logged in!")
-                login_win.destroy()
-                enable_callback()
-                show_user_profile(username)
-            else:
-                messagebox.showerror("Error", "Incorrect password!")
-        else:
-            salt, pwd_hash = hash_password(password)
-            creds[username] = {"name": username, "salt": salt, "hash": pwd_hash}
-            save_credentials(creds)
-            current_user = username
-            save_current_user(username)
-            messagebox.showinfo("Success", f"New user {username} created and logged in!")
-            login_win.destroy()
-            enable_callback()
-            show_user_profile(username)
+        # Normal User Login (no credentials.json)
+        current_user = username
+        save_current_user(username)
+        messagebox.showinfo("Success", f"User {username} logged in!")
+        login_win.destroy()
+        enable_callback()
+        show_user_profile(username)
 
     login_win = tk.Toplevel(root)
     login_win.title("Login")
@@ -141,13 +126,30 @@ def user_menu(username):
     menu.tk_popup(profile_btn.winfo_rootx(), profile_btn.winfo_rooty() + profile_btn.winfo_height())
 
 # ---------- Logout ---------- #
+# def logout():
+#     global current_user
+#     current_user = None
+#     profile_btn.pack_forget()
+#     login_btn.pack(side=tk.RIGHT, padx=10)
+#     disable_features()
+#     messagebox.showinfo("Logout", "You have been logged out.")
+
 def logout():
     global current_user
     current_user = None
-    profile_btn.pack_forget()
+    if os.path.exists("current_user.json"):
+        try:
+            os.remove("current_user.json")
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not remove current_user.json: {e}")
+    try:
+        profile_btn.pack_forget()
+    except:
+        pass
     login_btn.pack(side=tk.RIGHT, padx=10)
     disable_features()
     messagebox.showinfo("Logout", "You have been logged out.")
+
 
 # ---------- Enable/Disable Main Features ---------- #
 def enable_features():
