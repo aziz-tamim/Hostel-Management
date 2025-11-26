@@ -917,7 +917,7 @@ summary_year.grid(row=0, column=7, padx=5, pady=5, sticky="ew")
 # Buttons in separate row (original width)
 std_summary_chart = tk.Button(summary_frame, text="Show Summary & Chart", command=show_student_summary,
           bg="#ff9800", fg="white", disabledforeground="#bebebe", font=("Helvetica", 11, "bold"), width=20, pady=6)
-std_summary_chart.grid(row=1, column=0, padx=5, pady=10, sticky="w")          
+std_summary_chart.grid(row=1, column=0, padx=5, pady=10, sticky="w")
 
 # ------------ New Buttons: Export Month & Clear ------------ #
 def export_month_data():
@@ -957,7 +957,7 @@ def clear_all_data():
 export_mnt_dt = tk.Button(summary_frame, text="Export Month Data", command=export_month_data,
           bg="#4CAF50", fg="white", disabledforeground="#bebebe", font=("Helvetica", 11, "bold"), width=18, pady=6)
 export_mnt_dt.grid(row=1, column=1, padx=5, pady=10, sticky="w")
-          
+
 # Empty column to create space between left and right buttons
 tk.Label(summary_frame, text="", bg=theme["bg"]).grid(row=1, column=2, padx=50)
 
