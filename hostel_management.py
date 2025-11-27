@@ -220,10 +220,20 @@ def save_data():
         for row in data:
             writer.writerow(row)
 
-def has_fixed_cost(roll):
+# def has_fixed_cost(roll):
+#     for row in data:
+#         if row[1] == roll and (float(row[8]) > 0 or float(row[9]) > 0 or float(row[10]) > 0):
+#             return True
+#     return False
+
+def has_fixed_cost_this_month(roll):
+    """Check if this roll already has hostel, electricity, inventory added this month"""
+    now = datetime.now()
     for row in data:
-        if row[1] == roll and (float(row[8]) > 0 or float(row[9]) > 0 or float(row[10]) > 0):
-            return True
+        row_date = datetime.strptime(row[3], "%Y-%m-%d")
+        if row[1] == roll and row_date.year == now.year and row_date.month == now.month:
+            if float(row[8]) > 0 or float(row[9]) > 0 or float(row[10]) > 0:
+                return True
     return False
 
 # ------------------- Add Expense ------------------- #
@@ -233,15 +243,30 @@ def add_expense():
     student = student_name.get().strip()
     religion = religion_var.get()
     prayer_done = prayer_var.get()
-    meal_count = meal_count_entry.get().strip()
     meal_count_str = meal_count_entry.get().strip()
+    
+    # Check for fixed cost first
+    if has_fixed_cost_this_month(roll):
+        hostel = 0
+        electricity = 0
+        inventory = 0
+    else:
+        try:
+            hostel = float(hostel_entry.get() or 0)
+            electricity = float(electricity_entry.get() or 0)
+            inventory = float(inventory_entry.get() or 0)
+        except ValueError:
+            messagebox.showwarning("Warning", "Enter valid numeric values for fixed costs!")
+            return
+
+    # Meal count and mess handling
     try:
         meal_count = int(meal_count_str or 1)
     except ValueError:
         messagebox.showwarning("Warning", "Enter a valid number for meal count!")
         return
 
-    if meal_count > 10:
+    if meal_count > 20:
         response = messagebox.askyesno(
             "High Meal Count",
             f"Meal count is {meal_count}, which is unusually high.\nDo you want to proceed?"
@@ -252,20 +277,18 @@ def add_expense():
     if not roll or not student or not religion or not prayer_done:
         messagebox.showwarning("Warning", "All required fields must be filled!")
         return
+
     try:
         mess = float(mess_entry.get() or 0)
-        hostel = float(hostel_entry.get() or 0)
-        electricity = float(electricity_entry.get() or 0)
-        inventory = float(inventory_entry.get() or 0)
-        meal_count = int(meal_count or 1)
     except ValueError:
-        messagebox.showwarning("Warning", "Enter valid numeric values!")
+        messagebox.showwarning("Warning", "Enter valid numeric value for mess!")
         return
 
     if prayer_done == "No":
         meal_count += 1
     mess *= meal_count
 
+    # Save or update data
     if edit_index is not None:
         data[edit_index] = [
             edit_index + 1, roll, student, datetime.now().strftime("%Y-%m-%d"),

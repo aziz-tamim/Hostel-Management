@@ -23,16 +23,28 @@
 
 (এখানে সিস্টেমের একটি ছোট ডেমো বা Dashboard প্রিভিউ দেখানো হবে।)
 
-🟢 প্রোজেক্টের লক্ষ্য (সাজিদুল ইসলাম সাজিদ):
-"এই সিস্টেম তৈরি করার মূল উদ্দেশ্য ছিল:
+🟢এখন আমাদের গ্রুপ লিডার আবদুল আজিজ তামিম প্রোজেক্টের ওভারভিউ এবং অভিজ্ঞতা শেয়ার করবেন।
 
+🟢 প্রোজেক্টের লক্ষ্য (আবদুল আজিজ):
+
+"এই সিস্টেম তৈরি করার মূল উদ্দেশ্য ছিল:
 ✅ হোস্টেলের দৈনিক হিসাব স্বয়ংক্রিয় করা
 ✅ Meal, Prayer, Expense—সব রেকর্ড এক জায়গায় রাখা
 ✅ Admin ও User লগইন ও নিরাপদ ডাটা সঞ্চয়
 ✅ দ্রুত Summary ও হিসাব বিশ্লেষণ
 ✅ Chart ও রিপোর্ট সিস্টেম তৈরি করা
 
-🟢এখন আমাদের গ্রুপ লিডার আবদুল আজিজ তামিম প্রোজেক্টের ওভারভিউ এবং অভিজ্ঞতা শেয়ার করবেন।
+🟢 প্রযুক্তিগত দিক (আবদুল আজিজ তামিম):
+"আমরা সিস্টেমটি তৈরি করতে ব্যবহার করেছি:
+
+🛠️ Python (Tkinter GUI)
+🛠️ CSV File System – Daily Record Storage
+🛠️ JSON – Login Credentials
+🛠️ PIL – Profile Icon Handling
+🛠️ Matplotlib – Expense Chart
+🛠️ hashlib + base64 – Secure Password Hashing
+🛠️ datetime – তারিখ ও সময়
+
 
 "আমাদের Hostel Management System-এ রয়েছে:
 🔹 Student Entry System – Roll, Name, Religion, Prayer, Meal Count
@@ -45,17 +57,6 @@
 🔹 Theme System – Light এবং Dark দুই মোড
 🔹 Secure Login – Password Hashing + JSON Based Authentication
 🔹 CSV Data Storage – Lightweight, readable, easy to handle
-
-🟢 প্রযুক্তিগত দিক (আবদুল আজিজ তামিম):
-"আমরা সিস্টেমটি তৈরি করতে ব্যবহার করেছি:
-
-🛠️ Python (Tkinter GUI)
-🛠️ CSV File System – Daily Record Storage
-🛠️ JSON – Login Credentials
-🛠️ PIL – Profile Icon Handling
-🛠️ Matplotlib – Expense Chart
-🛠️ hashlib + base64 – Secure Password Hashing
-🛠️ datetime – তারিখ ও সময়
 
 🟢 ওভারভিউ (আবদুল আজিজ তামিম – টিম লিডার):
 "এই প্রোজেক্ট তৈরি করতে আমরা কিছু চ্যালেঞ্জের মুখোমুখি হয়েছিলাম, যেমন:
