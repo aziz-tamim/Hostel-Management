@@ -216,15 +216,9 @@ def save_data():
     with open(FILE_PATH, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["Serial", "Roll", "Student", "Date", "Religion", "PrayerDone",
-                         "MealCount", "Mess", "Hostel", "Electricity", "Inventory"])
+                 "MealCount", "Mess", "Hostel", "Electricity", "Inventory", "Total"])
         for row in data:
             writer.writerow(row)
-
-# def has_fixed_cost(roll):
-#     for row in data:
-#         if row[1] == roll and (float(row[8]) > 0 or float(row[9]) > 0 or float(row[10]) > 0):
-#             return True
-#     return False
 
 def has_fixed_cost_this_month(roll):
     """Check if this roll already has hostel, electricity, inventory added this month"""
@@ -287,7 +281,7 @@ def add_expense():
     if prayer_done == "No":
         meal_count += 1
     mess *= meal_count
-
+    total = mess + hostel + electricity + inventory
     # Save or update data
     if edit_index is not None:
         data[edit_index] = [
@@ -301,7 +295,7 @@ def add_expense():
         serial = len(data) + 1
         data.append([
             serial, roll, student, datetime.now().strftime("%Y-%m-%d"),
-            religion, prayer_done, meal_count, mess, hostel, electricity, inventory
+            religion, prayer_done, meal_count, mess, hostel, electricity, inventory, total
         ])
         messagebox.showinfo("Success", "New expense added!")
 
@@ -874,7 +868,7 @@ def popup_menu(event):
 table_frame = tk.Frame(root, bg=theme["bg"])
 table_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=5)
 
-columns = ["Serial", "Roll", "Student", "Date", "Religion", "PrayerDone", "MealCount", "Mess", "Hostel", "Electricity", "Inventory"]
+columns = ["Serial", "Roll", "Student", "Date", "Religion", "PrayerDone", "MealCount", "Mess", "Hostel", "Electricity", "Inventory", "Total"]
 tree = ttk.Treeview(table_frame, columns=columns, show="headings")
 
 style = ttk.Style()
