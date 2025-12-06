@@ -13,11 +13,11 @@
 
 আমি সাজিদুল ইসলাম সাজিদ, সিএসটি ফোর্থ (Assistant) BugBusters Team।
 
-আমি প্রীতম চক্রবর্তী, সিএসটি ফোর্থ (Team Member) BugBusters Team।
+আমি প্রীতম চক্রবর্তী, সিএসটি ফোর্থ (Design Coordinator) BugBusters Team।
 
-আমি আয়েশা ইসরাত চাঁদনী, সিএসটি ফোর্থ (Team Member) BugBusters Team।
+আমি আয়েশা ইসরাত চাঁদনী, সিএসটি ফোর্থ (Data Manager) BugBusters Team।
 
-আমি Eanur Sima, সিএসটি ফোর্থ (Team Member) BugBusters Team।
+আমি Eanur Sima, সিএসটি ফোর্থ (Quality Analyst) BugBusters Team।
 
 আমরা সবাই কম্পিউটার সায়েন্স অ্যান্ড টেকনোলজি বিভাগের ৪র্থ পর্বের শিক্ষার্থী, এবং এই Hostel Management System আমাদের সেমিস্টার প্রোজেক্ট।"
 
