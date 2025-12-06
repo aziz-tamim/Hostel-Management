@@ -45,7 +45,6 @@
 🛠️ hashlib + base64 – Secure Password Hashing
 🛠️ datetime – তারিখ ও সময়
 
-
 "আমাদের Hostel Management System-এ রয়েছে:
 🔹 Student Entry System – Roll, Name, Religion, Prayer, Meal Count
 🔹 Expense Management – Mess, Hostel, Electricity, Inventory Cost
