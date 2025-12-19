@@ -594,7 +594,7 @@ header_frame = tk.Frame(root, bg="#eee")
 header_frame.pack(fill=tk.X)
 
 def daily_reminder():
-    messagebox.showinfo("Reminder", "Remember to submit today’s meal count before 10 PM!")
+    messagebox.showinfo("Reminder", "Please check if there is a login. You must log in first.")
 root.after(1000, daily_reminder)
 
 root.title("Hostel & Mess Management System")
